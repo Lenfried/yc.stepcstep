@@ -102,6 +102,10 @@ APPLICATIONS = (
             note='major, or major_other when major == "other".'),
     Mapping('degree_type', 'text', (CSTEP,), field='degree_type'),
     Mapping('statement_support', 'text', (CSTEP,), field='support_statement'),
+    Mapping('career_aspiration', 'text', (CSTEP,), field='career_aspiration',
+            note='NEW COLUMN. Alternate eligibility basis for an applicant '
+                 'whose major is not itself STEM/licensure; see '
+                 'docs/eligibility_rules.md.'),
     Mapping('consent', 'boolean', (CSTEP,), field='consent'),
     Mapping('email_consent', 'boolean', (CSTEP,), field='email_consent',
             note='NEW COLUMN. Governs whether the program may email them.'),

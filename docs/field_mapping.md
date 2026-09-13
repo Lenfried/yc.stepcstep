@@ -146,12 +146,20 @@ can absorb non-numeric values later (e.g. `'ungraded'`) without a migration.
 | `major` + `major_other` | `major_at_application` | `text` | |
 | `degree_type` | `degree_type` | `text` | |
 | `support_statement` | `statement_support` | `text` | |
+| `career_aspiration` | `career_aspiration` | `text` | |
 | `consent` | `consent` | `boolean` | |
 | `email_consent` | `email_consent` | `boolean` | |
 
 `major_at_application` collapses two Plone fields: it holds `major`, or the
 free-text `major_other` when `major = 'other'`. `major_other` is therefore
 listed in `field_map.UNMAPPED` — deliberately not its own column.
+
+`career_aspiration` is optional. CSTEP eligibility is not limited to
+applicants already majoring in a STEM field or licensed profession — an
+applicant whose major is outside that list may still qualify on the strength
+of an intended STEM/licensure career, and this column captures that. Which
+majors qualify, and whether a stated career goal is sufficient on its own,
+are not yet decided — see Q7 below.
 
 `empl_id` is stored as text, not an integer: CUNY EMPLIDs are fixed-width
 8-digit identifiers and leading zeros must survive.
@@ -193,6 +201,8 @@ the decision/audit requirement.
 
 **Consent records (2)** — `consent`, `email_consent`
 
+**Career goal (1)** — `career_aspiration`
+
 `email_consent` in particular has no column today. Without it there is no
 record of whether the program may contact an applicant for promotional
 purposes — which is the kind of gap that only surfaces when someone
@@ -225,7 +235,7 @@ Two notes for the database side:
 
 ## 9. Open questions
 
-Q1–Q3 change the *rules*; Q4–Q6 change the *columns*.
+Q1–Q3 and Q7 change the *rules*; Q4–Q6 change the *columns*.
 
 **Q1 — Does underrepresented-minority status establish eligibility on its
 own?** CSTEP eligibility is normally "historically underrepresented minority
@@ -263,6 +273,14 @@ fix now; expensive after the first cohort.
 **Q6 — Retention.** How long are rejected applications kept, and is there a
 purge requirement? This affects whether the mapping needs a
 `retention_expires_at` column.
+
+**Q7 — Which majors count as a STEM field or licensed profession, and is
+`career_aspiration` sufficient on its own?** CSTEP eligibility is normally
+available either through a qualifying major or an applicant's stated intent
+to pursue one. The `MAJOR` vocabulary has no STEM/non-STEM classification
+today, and `career_aspiration` has no corresponding rule in
+`eligibility/rules.py`. Needs the program director's list of qualifying
+majors/professions before any major-based rule ships.
 
 ---
 

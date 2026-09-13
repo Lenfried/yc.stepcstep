@@ -36,8 +36,14 @@ From `ref/Decision Table.xlsx`, first match wins:
 Rule 1 is what ships today. Rules 2–7 are blocked on the questions below.
 
 Two columns in the source table — `Major` and `Enrolled Full-time` — are
-listed as dimensions but blank in every row, and `Enrolled Full-time` has no
-corresponding form field. Drop them from the table or add the field.
+listed as dimensions but blank in every row. `Major` now has a form field
+behind it on the CSTEP side: an applicant whose declared major is not itself
+a STEM field or licensed profession can instead complete `career_aspiration`
+to describe the one they intend to pursue. CSTEP eligibility is meant to
+accept either basis, but the table has no row that tests it, and neither
+"which majors qualify" nor "does a stated career goal alone qualify an
+applicant" is decided — see question 6 below. `Enrolled Full-time` still has
+no corresponding form field. Drop it from the table or add the field.
 
 ## Blocking questions
 
@@ -55,6 +61,12 @@ their column implications.
    scale is ambiguous today (0–100 vs 4.0).
 5. **What are the income thresholds by household size, and for which program
    year?** Needed as a table keyed on `household_size` 1–9.
+6. **Which majors count as a "STEM field or licensed profession" for CSTEP
+   eligibility, and does a stated `career_aspiration` alone qualify an
+   applicant whose major is not one of them?** The `MAJOR` vocabulary has no
+   STEM/non-STEM classification today, and `career_aspiration` has no
+   corresponding rule in `rules.py` yet — every CSTEP application still falls
+   through to manual review regardless of major or stated career goal.
 
 ## Adding a rule
 

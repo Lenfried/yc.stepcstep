@@ -64,7 +64,7 @@ class ICstepApplication(model.Schema):
     model.fieldset(
         'statement',
         label=_('Statement'),
-        fields=['support_statement'],
+        fields=['support_statement', 'career_aspiration'],
     )
 
     model.fieldset(
@@ -118,6 +118,23 @@ class ICstepApplication(model.Schema):
             'benefit from, academic enrichment or support in the STEM areas?'
         ),
         required=True,
+    )
+
+    # CSTEP eligibility is not limited to applicants already majoring in a
+    # STEM field or licensed profession: an applicant whose declared major
+    # is outside that list may still qualify on the strength of an intended
+    # STEM/licensure career. This field captures that alternate basis: which
+    # majors count as qualifying, and whether a stated goal is sufficient on
+    # its own, are open policy questions -- see docs/eligibility_rules.md.
+    career_aspiration = schema.Text(
+        title=_('Career aspirations / goals'),
+        description=_(
+            'Optional. If your major above is not itself a STEM field or a '
+            'licensed profession, describe the STEM field or licensed '
+            'profession you intend to pursue. CSTEP eligibility can be '
+            'established either by major or by career goal.'
+        ),
+        required=False,
     )
 
     consent = schema.Bool(

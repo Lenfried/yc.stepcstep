@@ -104,6 +104,12 @@ class TestCompleteness(unittest.TestCase):
         decision = rules.decide(rules.STEP, step_payload(household_income=None))
         self.assertEqual((), decision.missing_fields)
 
+    def test_career_aspiration_is_never_required(self):
+        # Optional by design; it only matters for applicants whose major is
+        # not itself STEM/licensure, and that rule is not yet implemented.
+        decision = rules.decide(rules.CSTEP, cstep_payload(career_aspiration=None))
+        self.assertEqual((), decision.missing_fields)
+
     def test_step_and_cstep_require_different_fields(self):
         # A CSTEP payload is not a complete STEP application and vice versa.
         self.assertTrue(rules.missing_fields(rules.STEP, cstep_payload()))
