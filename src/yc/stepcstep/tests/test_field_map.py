@@ -30,6 +30,14 @@ class TestFieldMap(unittest.TestCase):
         fields = [m.field for m in field_map.APPLICATIONS if m.field]
         self.assertEqual(len(fields), len(set(fields)))
 
+    def test_mapped_fields_includes_derived_column_sources(self):
+        # application_gpa and major_at_application have no `field` of their
+        # own -- they read cumulative_gpa/gpa and major via source_fields.
+        # mapped_fields() must still report those as accounted for, or
+        # test_schema_coverage.py wrongly flags them as forgotten.
+        for source in ('gpa', 'cumulative_gpa', 'major'):
+            self.assertIn(source, field_map.mapped_fields())
+
     def test_columns_for_step_excludes_cstep_only_columns(self):
         step = {m.column for m in field_map.columns_for(field_map.STEP)}
         self.assertIn('school_name', step)

@@ -29,6 +29,12 @@ class Mapping:
     programs: Tuple[str, ...]
     #: Plone field name, or None when the value is derived (see DERIVED).
     field: Optional[str] = None
+    #: Plone field names a *derived* column's DERIVED function reads, when
+    #: that isn't just ``field`` (e.g. application_gpa reads cumulative_gpa
+    #: or gpa depending on program). Declared here so mapped_fields() can
+    #: still see these fields as accounted for, even though no single column
+    #: maps to them directly.
+    source_fields: Tuple[str, ...] = ()
     #: True when the column holds personally identifiable information.
     pii: bool = False
     note: str = ''
@@ -99,6 +105,7 @@ APPLICATIONS = (
     Mapping('empl_id', 'text', (CSTEP,), field='emplid', pii=True),
     Mapping('classification', 'text', (CSTEP,), field='classification'),
     Mapping('major_at_application', 'text', (CSTEP,),
+            source_fields=('major',),
             note='major, or major_other when major == "other".'),
     Mapping('degree_type', 'text', (CSTEP,), field='degree_type'),
     Mapping('statement_support', 'text', (CSTEP,), field='support_statement'),
@@ -112,6 +119,7 @@ APPLICATIONS = (
 
     # --- GPA ------------------------------------------------------------
     Mapping('application_gpa', 'numeric(5,2)', BOTH,
+            source_fields=('cumulative_gpa', 'gpa'),
             note='cumulative_gpa (STEP) or gpa (CSTEP).'),
     Mapping('gpa_scale', 'text', BOTH,
             note="NEW COLUMN. '4.0' or '100'; see field_mapping.md Q4."),
@@ -139,8 +147,15 @@ def columns_for(program):
 
 
 def mapped_fields():
-    """Return every Plone field name that maps directly to a column."""
-    return {m.field for m in APPLICATIONS if m.field}
+    """Return every Plone field name accounted for by some column.
+
+    Includes both fields mapped directly (``field``) and fields a derived
+    column's getter reads instead (``source_fields``) -- e.g. application_gpa
+    has no ``field`` of its own but is derived from cumulative_gpa or gpa.
+    """
+    direct = {m.field for m in APPLICATIONS if m.field}
+    indirect = {name for m in APPLICATIONS for name in m.source_fields}
+    return direct | indirect
 
 
 def pii_columns():
