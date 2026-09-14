@@ -51,15 +51,37 @@ class TestFieldMap(unittest.TestCase):
     def test_both_programs_share_the_identity_block(self):
         step = {m.column for m in field_map.columns_for(field_map.STEP)}
         cstep = {m.column for m in field_map.columns_for(field_map.CSTEP)}
-        for column in ('first_name', 'last_name', 'email', 'date_of_birth'):
+        for column in ('first_name', 'last_name', 'student_email', 'date_of_birth'):
             self.assertIn(column, step)
             self.assertIn(column, cstep)
 
     def test_decision_columns_apply_to_both_programs(self):
-        for column in ('status', 'decision_reason', 'decided_at',
+        for column in ('program_status', 'decision_reason', 'decided_at',
                        'rules_version'):
             mapping = self._by_column(column)
             self.assertEqual(field_map.BOTH, mapping.programs)
+
+    def test_each_program_has_its_own_table(self):
+        self.assertNotEqual(
+            field_map.table_for(field_map.STEP),
+            field_map.table_for(field_map.CSTEP),
+        )
+
+    def test_no_program_discriminator_column(self):
+        # Each program writes to its own table, so a discriminator column
+        # would be redundant -- and the live STEP table has none.
+        columns = {m.column for m in field_map.APPLICATIONS}
+        self.assertNotIn('program', columns)
+
+    def test_gpa_columns_are_program_specific(self):
+        # With one table per program there is no need to alias the two GPA
+        # fields onto a shared column: each table uses its own field name.
+        step = {m.column for m in field_map.columns_for(field_map.STEP)}
+        cstep = {m.column for m in field_map.columns_for(field_map.CSTEP)}
+        self.assertIn('cumulative_gpa', step)
+        self.assertNotIn('cumulative_gpa', cstep)
+        self.assertIn('gpa', cstep)
+        self.assertNotIn('gpa', step)
 
     def test_income_is_flagged_as_pii(self):
         self.assertIn('household_income', field_map.pii_columns())
