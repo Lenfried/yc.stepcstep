@@ -112,6 +112,17 @@ class TestApplicantPermissions(unittest.TestCase):
         self.application = createContentInContainer(
             self.folder, 'step_application', checkConstraints=False,
             **step_payload())
+        # Staff must be different people from the applicant. TEST_USER created
+        # the application and therefore holds Owner on it permanently --
+        # setRoles() changes portal roles and cannot take a local role away.
+        # Standing that user in for staff silently grants every staff check
+        # Owner's rights as well, which is what made a draft look visible to
+        # staff and what let the 'staff may view a submission' check pass
+        # without exercising the ProgramStaff grant at all.
+        api.user.create(email='staffer@york.cuny.edu', username='staffer',
+                        password='secret_staffer', roles=('ProgramStaff',))
+        api.user.create(email='director@york.cuny.edu', username='director',
+                        password='secret_director', roles=('ProgramDirector',))
 
     def _can(self, permission):
         return bool(
@@ -138,26 +149,22 @@ class TestApplicantPermissions(unittest.TestCase):
         self.assertTrue(self._can('Modify portal content'))
 
     def test_a_draft_is_not_visible_to_program_staff(self):
-        setRoles(self.portal, TEST_USER_ID, ['ProgramStaff'])
-        login(self.portal, TEST_USER_NAME)
+        login(self.portal, 'staffer')
         self.assertFalse(self._can('View'))
 
     def test_program_staff_may_view_a_submitted_application(self):
         api.content.transition(obj=self.application, transition='submit')
-        setRoles(self.portal, TEST_USER_ID, ['ProgramStaff'])
-        login(self.portal, TEST_USER_NAME)
+        login(self.portal, 'staffer')
         self.assertTrue(self._can('View'))
 
     def test_program_staff_may_not_decide(self):
         api.content.transition(obj=self.application, transition='submit')
-        setRoles(self.portal, TEST_USER_ID, ['ProgramStaff'])
-        login(self.portal, TEST_USER_NAME)
+        login(self.portal, 'staffer')
         self.assertFalse(self._can('yc.stepcstep: Decide Application'))
 
     def test_program_director_may_decide(self):
         api.content.transition(obj=self.application, transition='submit')
-        setRoles(self.portal, TEST_USER_ID, ['ProgramDirector'])
-        login(self.portal, TEST_USER_NAME)
+        login(self.portal, 'director')
         self.assertTrue(self._can('yc.stepcstep: Decide Application'))
 
     def test_anonymous_may_never_view_an_application(self):

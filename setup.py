@@ -50,6 +50,12 @@ setup(
         'test': [
             'plone.app.testing',
             'plone.app.contenttypes',
+            # Imported by plone.app.contenttypes.testing, which testing.py
+            # builds its layer on. plone.app.contenttypes keeps it in its own
+            # test extra, so installing that package does not bring it along
+            # and a clean checkout cannot run the integration tests without
+            # it. Not a robot-test dependency of ours -- do not drop it.
+            'plone.app.robotframework',
             'plone.testing',
         ],
     },
